@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161b22"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Window Container -->
+  <g filter="url(#shadow)">
+    <rect x="20" y="15" width="720" height="270" rx="10" ry="10" fill="url(#bg-grad)" stroke="#30363d" stroke-width="1"/>
+  </g>
+
+  <!-- Title Bar -->
+  <rect x="20" y="15" width="720" height="38" rx="10" ry="10" fill="#161b22"/>
+  <rect x="20" y="43" width="720" height="10" fill="#161b22"/>
+  <line x1="20" y1="53" x2="740" y2="53" stroke="#21262d" stroke-width="1"/>
+
+  <!-- Window Buttons -->
+  <circle cx="42" cy="34" r="6" fill="#ff5f56" stroke="#e0443e" stroke-width="0.5"/>
+  <circle cx="62" cy="34" r="6" fill="#ffbd2e" stroke="#dea123" stroke-width="0.5"/>
+  <circle cx="82" cy="34" r="6" fill="#27c93f" stroke="#1aab29" stroke-width="0.5"/>
+
+  <!-- Title -->
+  <text x="380" y="38" fill="#8b949e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="500" text-anchor="middle">keep-awake — zsh — 80x24</text>
+
+  <!-- Terminal Content -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" line-height="1.6">
+    <!-- Command Prompt -->
+    <text x="45" y="88" fill="#58a6ff" font-weight="600">user@laptop</text>
+    <text x="145" y="88" fill="#8b949e">:</text>
+    <text x="155" y="88" fill="#7ee787">~</text>
+    <text x="170" y="88" fill="#c9d1d9">$ awake 45m</text>
+
+    <!-- Output lines -->
+    <text x="45" y="118" fill="#8b949e">🔐 Authenticating to manage system sleep policy (pmset)...</text>
+
+    <text x="45" y="148" fill="#7ee787" font-weight="600">⚡ System awake assertion active (closed-lid allowed).</text>
+    <text x="450" y="148" fill="#8b949e">Press Ctrl+C to cancel.</text>
+
+    <text x="45" y="178" fill="#f2cc60">⏳ Timer set for 45 minute(s)...</text>
+    <text x="310" y="178" fill="#58a6ff">[████████████████░░░░] 75% remaining</text>
+
+    <text x="45" y="212" fill="#8b949e">^C</text>
+    <text x="45" y="242" fill="#3fb950" font-weight="600">✅ Power management restored (system sleep re-enabled).</text>
+  </g>
+</svg>
