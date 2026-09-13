@@ -41,6 +41,17 @@ Many existing tools (like Capsomnia or Amphetamine) require:
 
 ---
 
+## The Philosophy
+
+1. **The Ladder of Restraint (Native Platform First):**  
+   If the operating system already solves a problem (`pmset`, `systemd-inhibit`), writing custom daemons, LaunchAgents, or GUI wrappers is not innovation—it is technical debt.
+2. **Code You Know, Not Code You Trust (Digital Sovereignty):**  
+   True security is never about blind trust in a developer's certificate, promises, or closed binary. It is about code you can audit yourself in 60 seconds before running it.
+3. **Hardware Ethics:**  
+   Software does not run in a vacuum; it runs on lithium-ion chemistry and silicon. We prioritize thermal safety and battery longevity over brute-force overrides.
+
+---
+
 ## Installation
 
 ### Option 1: One-liner (Remote)
@@ -138,6 +149,15 @@ Even with sleep disabled, both macOS and Linux kernel hardware monitors enforce 
 # Or manually
 rm -f ~/.local/bin/keep-awake ~/.local/bin/awake
 ```
+
+---
+
+## Scope & Non-Goals
+
+To preserve zero-bloat integrity, `keep-awake` has strict non-goals:
+* ❌ **No Menu Bar / GUI:** If you want desktop widgets and animations, use Amphetamine.
+* ❌ **No Resident Daemons:** `keep-awake` will never install background services. It runs, holds the assertion, and exits cleanly.
+* ❌ **No Third-Party Dependencies:** It will forever remain a self-contained, auditable Bash script.
 
 ---
 

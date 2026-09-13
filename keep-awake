@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # keep-awake: Minimal CLI to keep laptop awake (even closed-lid) on macOS & Linux
+#
+# Architectural Tenets:
+# 1. Native platform primitives first (pmset, systemd-inhibit).
+# 2. Zero resident daemons, zero accessibility hooks, zero sudoers tampering.
+# 3. Guaranteed atomic state cleanup on termination via POSIX trap.
+# 4. Zero third-party dependencies.
 # ==============================================================================
 set -euo pipefail
 
@@ -28,6 +34,7 @@ Examples:
 EOF
 }
 
+# Defensive Input: Strict whitelist regex. Reject negative, float or corrupt input
 parse_duration() {
     local input="${1:-60m}"
     case "$input" in
@@ -69,6 +76,7 @@ parse_duration() {
     esac
 }
 
+# Hardware Ethics: Never sacrifice battery chemistry for unattended tasks
 check_battery_warning() {
     local batt=""
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -97,6 +105,7 @@ run_macos() {
         exit 1
     fi
 
+    # Atomic State Guarantee: Never leave the system in an unmanaged power state
     trap cleanup_macos INT TERM EXIT
 
     check_battery_warning

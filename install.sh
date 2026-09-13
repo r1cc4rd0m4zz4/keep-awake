@@ -65,7 +65,8 @@ fi
 
 mkdir -p "$BIN_DIR"
 
-# Check if running from a local repository clone (any working directory)
+# Dual-Mode Portability: Zero assumptions about repository visibility.
+# Install directly from local clone if present; fallback to remote only if piped.
 SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
 LOCAL_FILE=""
 if [[ -n "$SCRIPT_SOURCE" && -f "$SCRIPT_SOURCE" ]]; then
