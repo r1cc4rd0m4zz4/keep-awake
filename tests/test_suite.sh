@@ -50,6 +50,7 @@ assert_exit_code 0 "keep-awake --help exits with 0" "$BIN_PATH" --help
 assert_exit_code 0 "keep-awake -h exits with 0" "$BIN_PATH" -h
 assert_exit_code 0 "keep-awake --version exits with 0" "$BIN_PATH" --version
 assert_exit_code 0 "keep-awake -v exits with 0" "$BIN_PATH" -v
+assert_exit_code 0 "keep-awake --countdown 1 exits with 0" "$BIN_PATH" --countdown 1
 
 # 2. Test Duration Parsing Logic
 echo "[2] Duration Parsing Unit Tests"

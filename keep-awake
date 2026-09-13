@@ -91,8 +91,63 @@ check_battery_warning() {
 }
 
 cleanup_macos() {
+    tput cnorm 2>/dev/null || true
+    echo ""
     sudo pmset -a disablesleep 0 2>/dev/null || true
     echo -e "\n✅ Power management restored (system sleep re-enabled)."
+}
+
+countdown_timer() {
+    local total_seconds="$1"
+    local remaining="$total_seconds"
+    local bar_width=20
+
+    # Non-interactive fallback (e.g. piped or backgrounded)
+    if [[ ! -t 1 ]]; then
+        sleep "$total_seconds"
+        return
+    fi
+
+    # Hide cursor during active ticking
+    tput civis 2>/dev/null || true
+
+    while (( remaining >= 0 )); do
+        local elapsed=$(( total_seconds - remaining ))
+        local percent=0
+        local filled=0
+        if (( total_seconds > 0 )); then
+            percent=$(( (elapsed * 100) / total_seconds ))
+            filled=$(( (elapsed * bar_width) / total_seconds ))
+        fi
+        local empty=$(( bar_width - filled ))
+
+        local bar=""
+        for ((i=0; i<filled; i++)); do bar+="█"; done
+        for ((i=0; i<empty; i++)); do bar+="░"; done
+
+        local rem_mins=$(( remaining / 60 ))
+        local rem_secs=$(( remaining % 60 ))
+        local time_str
+        if (( rem_mins >= 60 )); then
+            local rem_hours=$(( rem_mins / 60 ))
+            rem_mins=$(( rem_mins % 60 ))
+            time_str=$(printf "%02dh %02dm %02ds" "$rem_hours" "$rem_mins" "$rem_secs")
+        else
+            time_str=$(printf "%02dm %02ds" "$rem_mins" "$rem_secs")
+        fi
+
+        printf "\r\033[K⏳ Timer running: [%s] %3d%% (%s remaining)" "$bar" "$percent" "$time_str"
+
+        if (( remaining == 0 )); then
+            break
+        fi
+
+        sleep 1
+        remaining=$(( remaining - 1 ))
+    done
+
+    echo ""
+    tput cnorm 2>/dev/null || true
 }
 
 run_macos() {
@@ -117,7 +172,7 @@ run_macos() {
     else
         local mins=$(( seconds / 60 ))
         echo "⏳ Timer set for ${mins} minute(s)..."
-        sleep "$seconds"
+        countdown_timer "$seconds"
     fi
 }
 
@@ -148,7 +203,7 @@ run_linux() {
             --what="idle:sleep:handle-lid-switch" \
             --who="keep-awake" \
             --why="User requested temporary keep-awake" \
-            sleep "$seconds"
+            "$0" --countdown "$seconds"
     fi
 
     echo -e "\n✅ Sleep inhibitor released. Normal power management restored."
@@ -175,6 +230,14 @@ main() {
                 fi
                 target_cmd="$2"
                 shift 2
+                ;;
+            --countdown)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: Option --countdown requires seconds." >&2
+                    exit 1
+                fi
+                countdown_timer "$2"
+                exit 0
                 ;;
             *)
                 duration_arg="$1"
