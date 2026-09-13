@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
+[![CI](https://github.com/r1cc4rd0m4zz4/keep-awake/actions/workflows/ci.yml/badge.svg)](https://github.com/r1cc4rd0m4zz4/keep-awake/actions/workflows/ci.yml)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-blue.svg)](#how-it-works)
 
 `keep-awake` (or simply `awake`) is a transparent, lightweight command-line tool that prevents system sleep, screen sleep, and clamshell/lid-closed sleep.
@@ -104,6 +105,23 @@ rm -f ~/.local/bin/keep-awake ~/.local/bin/awake
 
 ---
 
+## Security & Quality Gates
+
+This repository adheres to strict defensive security standards:
+* **Static Analysis:** Automated `shellcheck` with zero tolerated warnings on all scripts.
+* **Secret Detection:** Automated `gitleaks` scanning on every push and pull request.
+* **Regression Testing:** Automated multi-platform test suite (`tests/test_suite.sh`) executing on macOS and Linux runners.
+
+---
+
+## Author & Lead Developer
+
+* **r1cc4rd0m4zz4** ([@r1cc4rd0m4zz4](https://github.com/r1cc4rd0m4zz4))  
+  *Cybersecurity Specialist & Anti-Bloat Architect.*
+
+---
+
 ## License
 
 MIT License © 2025 r1cc4rd0m4zz4
+

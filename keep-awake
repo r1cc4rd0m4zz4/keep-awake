@@ -33,17 +33,33 @@ parse_duration() {
     case "$input" in
         *[hH])
             local num="${input%[hH]}"
+            if [[ ! "$num" =~ ^[0-9]+$ ]] || [[ "$num" -le 0 ]]; then
+                echo "Error: Duration must be a positive integer (e.g. 2h)." >&2
+                exit 1
+            fi
             echo "$(( num * 3600 ))"
             ;;
         *[mM])
             local num="${input%[mM]}"
+            if [[ ! "$num" =~ ^[0-9]+$ ]] || [[ "$num" -le 0 ]]; then
+                echo "Error: Duration must be a positive integer (e.g. 45m)." >&2
+                exit 1
+            fi
             echo "$(( num * 60 ))"
             ;;
         *[sS])
             local num="${input%[sS]}"
+            if [[ ! "$num" =~ ^[0-9]+$ ]] || [[ "$num" -le 0 ]]; then
+                echo "Error: Duration must be a positive integer (e.g. 300s)." >&2
+                exit 1
+            fi
             echo "$(( num ))"
             ;;
         *[0-9])
+            if [[ ! "$input" =~ ^[0-9]+$ ]] || [[ "$input" -le 0 ]]; then
+                echo "Error: Duration must be a positive integer (e.g. 60)." >&2
+                exit 1
+            fi
             echo "$(( input * 60 ))"
             ;;
         *)

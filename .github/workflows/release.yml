@@ -1,0 +1,36 @@
+name: Release Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Test Suite
+        run: |
+          chmod +x keep-awake install.sh tests/test_suite.sh scripts/package.sh
+          ./tests/test_suite.sh
+
+      - name: Package Release Archive
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          ./scripts/package.sh "$VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS.txt
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'rc') }}
