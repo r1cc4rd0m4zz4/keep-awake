@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# keep-awake: Minimal CLI to keep laptop awake (even closed-lid) on macOS & Linux
+# ==============================================================================
+set -euo pipefail
+
+VERSION="1.0.0"
+
+show_help() {
+    cat <<EOF
+keep-awake v${VERSION}
+Usage: keep-awake [OPTIONS] [DURATION]
+       awake [OPTIONS] [DURATION]
+
+Arguments:
+  DURATION        Duration to stay awake (e.g. 30m, 2h, 3600s, 60). Default: 60m.
+
+Options:
+  -c, --command   Run a command and restore sleep as soon as it finishes.
+  -h, --help      Display this help message and exit.
+  -v, --version   Display version information and exit.
+
+Examples:
+  awake                         # Stay awake for 60 minutes
+  awake 45m                     # Stay awake for 45 minutes
+  awake 2h                      # Stay awake for 2 hours
+  awake -c "npm run build"      # Stay awake only while command runs
+EOF
+}
+
+parse_duration() {
+    local input="${1:-60m}"
+    case "$input" in
+        *[hH])
+            local num="${input%[hH]}"
+            echo "$(( num * 3600 ))"
+            ;;
+        *[mM])
+            local num="${input%[mM]}"
+            echo "$(( num * 60 ))"
+            ;;
+        *[sS])
+            local num="${input%[sS]}"
+            echo "$(( num ))"
+            ;;
+        *[0-9])
+            echo "$(( input * 60 ))"
+            ;;
+        *)
+            echo "Error: Invalid duration format '$input'. Use e.g. 30m, 2h, 3600s." >&2
+            exit 1
+            ;;
+    esac
+}
+
+check_battery_warning() {
+    local batt=""
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        batt="$(pmset -g batt 2>/dev/null | grep -Eo '[0-9]+%' | head -n 1 | tr -d '%' || true)"
+    elif [[ -f /sys/class/power_supply/BAT0/capacity ]]; then
+        batt="$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || true)"
+    fi
+
+    if [[ -n "$batt" && "$batt" =~ ^[0-9]+$ && "$batt" -le 15 ]]; then
+        echo "⚠️  Warning: Low battery level (${batt}%). Ensure your laptop is connected to power." >&2
+    fi
+}
+
+cleanup_macos() {
+    sudo pmset -a disablesleep 0 2>/dev/null || true
+    echo -e "\n✅ Power management restored (system sleep re-enabled)."
+}
+
+run_macos() {
+    local seconds="$1"
+    local custom_cmd="${2:-}"
+
+    echo "🔐 Authenticating to manage system sleep policy (pmset)..."
+    if ! sudo pmset -a disablesleep 1; then
+        echo "❌ Authentication failed or cancelled." >&2
+        exit 1
+    fi
+
+    trap cleanup_macos INT TERM EXIT
+
+    check_battery_warning
+    echo "⚡ System awake assertion active (closed-lid allowed). Press Ctrl+C to cancel."
+
+    if [[ -n "$custom_cmd" ]]; then
+        echo "▶️ Executing: $custom_cmd"
+        eval "$custom_cmd"
+    else
+        local mins=$(( seconds / 60 ))
+        echo "⏳ Timer set for ${mins} minute(s)..."
+        sleep "$seconds"
+    fi
+}
+
+run_linux() {
+    local seconds="$1"
+    local custom_cmd="${2:-}"
+
+    check_battery_warning
+
+    if ! command -v systemd-inhibit >/dev/null 2>&1; then
+        echo "❌ systemd-inhibit not found. A system with systemd/logind is required on Linux." >&2
+        exit 1
+    fi
+
+    echo "⚡ System awake lock active via systemd-inhibit (logind). Press Ctrl+C to cancel."
+
+    if [[ -n "$custom_cmd" ]]; then
+        echo "▶️ Executing: $custom_cmd"
+        systemd-inhibit \
+            --what="idle:sleep:handle-lid-switch" \
+            --who="keep-awake" \
+            --why="Running task with lid closed" \
+            bash -c "$custom_cmd"
+    else
+        local mins=$(( seconds / 60 ))
+        echo "⏳ Timer set for ${mins} minute(s)..."
+        systemd-inhibit \
+            --what="idle:sleep:handle-lid-switch" \
+            --who="keep-awake" \
+            --why="User requested temporary keep-awake" \
+            sleep "$seconds"
+    fi
+
+    echo -e "\n✅ Sleep inhibitor released. Normal power management restored."
+}
+
+main() {
+    local target_cmd=""
+    local duration_arg=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                echo "keep-awake v${VERSION}"
+                exit 0
+                ;;
+            -c|--command)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: Option --command requires a command string." >&2
+                    exit 1
+                fi
+                target_cmd="$2"
+                shift 2
+                ;;
+            *)
+                duration_arg="$1"
+                shift
+                ;;
+        esac
+    done
+
+    local total_seconds
+    total_seconds="$(parse_duration "${duration_arg:-60m}")"
+
+    case "$OSTYPE" in
+        darwin*)
+            run_macos "$total_seconds" "$target_cmd"
+            ;;
+        linux*)
+            run_linux "$total_seconds" "$target_cmd"
+            ;;
+        *)
+            echo "❌ Unsupported operating system: $OSTYPE" >&2
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
