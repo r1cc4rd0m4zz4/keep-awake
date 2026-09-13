@@ -171,10 +171,18 @@ This repository adheres to strict defensive security engineering:
 
 ---
 
-## Author & Lead Developer
+## Contributors & Authors
+
+<p align="left">
+  <a href="https://github.com/r1cc4rd0m4zz4">
+    <img src="https://github.com/r1cc4rd0m4zz4.png" width="64" height="64" alt="r1cc4rd0m4zz4" style="border-radius: 50%;">
+  </a>
+</p>
 
 * **r1cc4rd0m4zz4** ([@r1cc4rd0m4zz4](https://github.com/r1cc4rd0m4zz4))  
   *Cybersecurity Specialist & Anti-Bloat Architect.*
+
+See also [CONTRIBUTORS.md](CONTRIBUTORS.md) for contribution guidelines.
 
 ---
 
