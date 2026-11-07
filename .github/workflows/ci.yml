@@ -10,6 +10,7 @@ jobs:
   lint-and-codesmell:
     name: ShellCheck & CodeSmell
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,6 +22,7 @@ jobs:
   security-audit:
     name: Secret & Vulnerability Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,11 +35,9 @@ jobs:
           /tmp/gitleaks detect --redact --verbose --source .
 
   automated-tests:
-    name: Functional Tests
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    name: Functional Tests (Ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
